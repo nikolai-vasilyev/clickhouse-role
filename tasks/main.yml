@@ -1,2 +1,42 @@
 ---
-# tasks file for clickhouse-role
+- name: Download Clickhouse
+  block:
+    - name: Get clickhouse distrib
+      ansible.builtin.get_url:
+        url: "{{ repo_click }}/clickhouse-client/clickhouse-client_{{ clickhouse_version }}_amd64.deb"
+        dest: "./clickhouse-client_{{ clickhouse_version }}_amd64.deb"
+        mode: "0755"
+    - name: Get clickhouse distrib
+      ansible.builtin.get_url:
+        url: "{{ repo_click }}/clickhouse-common-static/clickhouse-common-static_{{ clickhouse_version }}_amd64.deb"
+        dest: "./clickhouse-common-static_{{ clickhouse_version }}_amd64.deb"
+        mode: "0755"
+    - name: Get clickhouse distrib
+      ansible.builtin.get_url:
+        url: "{{ repo_click }}/clickhouse-server/clickhouse-server_{{ clickhouse_version }}_amd64.deb"
+        dest: "./clickhouse-server_{{ clickhouse_version }}_amd64.deb"
+        mode: "0755"
+- name: Install clickhouse packages
+  ansible.builtin.apt:
+    deb: "{{ item }}"
+  with_items:
+    - clickhouse-common-static_{{ clickhouse_version }}_amd64.deb
+    - clickhouse-client_{{ clickhouse_version }}_amd64.deb
+    - clickhouse-server_{{ clickhouse_version }}_amd64.deb
+  become: true
+  notify: Start clickhouse service
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+- name: Wait Service
+  ansible.builtin.service:
+    name: clickhouse-server
+    state: started
+  register: expected_service
+  until: expected_service.status.ActiveState == "active"
+  retries: 10
+  delay: 3
+- name: Create database
+  ansible.builtin.command: "clickhouse-client -q 'create database logs;'"
+  register: create_db
+  failed_when: create_db.rc != 0 and create_db.rc != 82
+  changed_when: create_db.rc == 0

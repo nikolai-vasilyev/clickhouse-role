@@ -16,6 +16,7 @@
         url: "{{ repo_click }}/clickhouse-server/clickhouse-server_{{ clickhouse_version }}_amd64.deb"
         dest: "./clickhouse-server_{{ clickhouse_version }}_amd64.deb"
         mode: "0755"
+
 - name: Install clickhouse packages
   ansible.builtin.apt:
     deb: "{{ item }}"

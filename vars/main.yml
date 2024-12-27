@@ -1,2 +1,2 @@
 ---
-# vars file for clickhouse-role
+repo_click: "https://packages.clickhouse.com/deb/pool/main/c"

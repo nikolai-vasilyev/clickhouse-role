@@ -35,7 +35,7 @@
   register: expected_service
   until: expected_service.status.ActiveState == "active"
   retries: 10
-  delay: 3
+  delay: 5
 - name: Create database
   ansible.builtin.command: "clickhouse-client -q 'create database logs;'"
   register: create_db
